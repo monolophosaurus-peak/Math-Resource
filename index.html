@@ -1,0 +1,1954 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>maths-resource</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+  :root {
+    --bg: #17122e; --panel: #221a42; --raise: #2d2356; --line: #3b2f6b;
+    --text: #f3efff; --muted: #a99ed0; --pink: #ff5c8a; --mint: #45e3b0; --sun: #ffd23f;
+    --fun: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  }
+  html[data-theme="ocean"] { --bg:#0c1b2a; --panel:#12283d; --raise:#183350; --line:#244766; --text:#e6f2ff; --muted:#8fb3d0; --pink:#2fb8c6; --mint:#5fe0b0; --sun:#ffd166; }
+  html[data-theme="forest"] { --bg:#0f1f16; --panel:#16301f; --raise:#1d3f2a; --line:#2a5638; --text:#e9f6ec; --muted:#9cc4a6; --pink:#e0794f; --mint:#57d98a; --sun:#f2c94c; }
+  html[data-theme="rose"] { --bg:#2a0f1c; --panel:#3d1729; --raise:#4f1f36; --line:#6b2c48; --text:#ffeef5; --muted:#d0a0b6; --pink:#ff5c8a; --mint:#5fe0c0; --sun:#ffd23f; }
+  html[data-theme="light"] { --bg:#eef1f7; --panel:#ffffff; --raise:#f0f2f8; --line:#d3dae8; --text:#1f2733; --muted:#66718a; --pink:#d6407a; --mint:#1aa87a; --sun:#c78a00; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex; flex-direction: column; height: 100dvh; color: var(--text);
+    font-family: system-ui, sans-serif;
+    background: var(--bg) radial-gradient(#2a2250 1px, transparent 1px) 0 0 / 22px 22px;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  }
+  [hidden] { display: none !important; }
+  #app-root { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  input, button { font: inherit; }
+  input { background: var(--panel); color: var(--text); border: 2px solid var(--line); border-radius: 14px; padding: 10px 14px; outline: none; min-width: 0; }
+  input:focus { border-color: var(--pink); }
+  button { background: var(--pink); color: #fff; border: 0; border-radius: 999px; padding: 10px 18px; font-family: var(--fun); font-weight: 700; cursor: pointer; transition: transform .1s; }
+  button:active { transform: scale(.94); }
+  button:disabled { opacity: .45; cursor: default; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+  .ghost { background: var(--raise); color: var(--text); }
+  .small { padding: 6px 14px; font-size: 14px; }
+  .danger { background: none; color: var(--muted); padding: 8px 10px; font-size: 18px; }
+  .danger:hover { color: var(--pink); }
+
+  .screen { display: none; flex: 1; min-height: 0; height: 100%; width: 100%; max-width: 760px; margin: 0 auto; flex-direction: column; overflow: hidden; }
+  #screen-chat { min-height: 0; }
+  #screen-chat .bar-top, #screen-chat #tools, #screen-chat #bar, #screen-chat #emojis, #screen-chat #warn, #screen-chat #chatsearch { flex: none; }
+  .screen.active { display: flex; }
+  .box.active { justify-content: center; max-width: 380px; padding: 24px; gap: 12px; }
+  .stack { display: flex; flex-direction: column; gap: 12px; }
+  .back { align-self: flex-start; }
+  h1 {
+    font-family: var(--fun); font-size: clamp(38px, 11vw, 52px); margin: 0; line-height: 1;
+    background: linear-gradient(90deg, var(--pink), var(--sun)); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  h2 { font-family: var(--fun); font-size: 30px; margin: 0; }
+  .error { color: var(--sun); min-height: 1.4em; margin: 0; }
+  .hint { color: var(--muted); font-size: 14px; margin: 0; }
+  .center { text-align: center; }
+  .waiting { margin: 0; background: var(--raise); padding: 8px 12px; border-radius: 12px; }
+  .waiting:empty { display: none; }
+
+  .notif { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 16px; background: var(--sun); color: #2a1d00; font-weight: 700; }
+  .notif button { background: #2a1d00; color: var(--sun); padding: 4px 12px; font-size: 14px; }
+  .warn { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 10px 16px; background: #5a1630; color: #ffd6e2; font-size: 14px; }
+  .warn button { background: #ffd6e2; color: #5a1630; padding: 4px 12px; font-size: 13px; }
+
+  .bar-top { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--panel); }
+  .ver { align-self: flex-start; margin-top: -6px; background: var(--raise); color: var(--sun); font-family: var(--fun); font-size: 13px; padding: 2px 10px; border-radius: 999px; }
+  .logo small { font-size: 13px; color: var(--sun); }
+  .logo { font-family: var(--fun); font-weight: 700; font-size: 22px; color: var(--pink); }
+  .me-tag { flex: 1; color: var(--muted); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .add { display: flex; gap: 8px; padding: 16px; }
+  .add input { flex: 1; }
+  .section { margin: 4px 16px 8px; color: var(--muted); font-size: 14px; }
+  .contacts { list-style: none; margin: 0; padding: 0 10px 16px; overflow-y: auto; flex: 1; }
+  .contact { display: flex; align-items: center; gap: 4px; border-radius: 18px; }
+  .contact:hover { background: var(--panel); }
+  .contact.request { background: var(--panel); box-shadow: inset 0 0 0 2px var(--sun); }
+  .contact .open { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; background: none; color: var(--text); padding: 10px; border-radius: 18px; text-align: left; font-family: inherit; font-weight: 400; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: none; font-family: var(--fun); font-weight: 700; font-size: 19px; color: #1d0610; position: relative; }
+  .avatar.big { width: 84px; height: 84px; font-size: 38px; }
+  .avatar .dot { position: absolute; right: -1px; bottom: -1px; width: 13px; height: 13px; border-radius: 50%; background: var(--line); border: 2px solid var(--bg); }
+  .avatar.big .dot { width: 20px; height: 20px; right: 2px; bottom: 2px; }
+  .avatar .dot.on { background: var(--mint); }
+  .who { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .who b { font-family: var(--fun); font-weight: 500; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .who span { color: var(--muted); font-size: 13px; }
+  .badge { background: var(--pink); color: #fff; border-radius: 999px; font-size: 13px; font-weight: 700; padding: 1px 9px; }
+
+  .profile { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 28px 16px 20px; text-align: center; }
+  .profile h2 { margin-top: 8px; }
+  .profile p { margin: 0; }
+  #screen-profile { overflow-y: auto; }
+  .pw-box { padding: 0 16px 24px; }
+  #p-status.on { color: var(--mint); }
+
+  .peer { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+  .peer b { font-family: var(--fun); font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #peer-status { font-size: 13px; color: var(--muted); }
+  #peer-status.on { color: var(--mint); }
+  #tools { display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; border-bottom: 2px solid var(--line); background: var(--panel); scrollbar-width: none; }
+  #tools::-webkit-scrollbar { display: none; }
+  .pill { flex: none; background: var(--raise); color: var(--text); padding: 7px 14px; font-size: 14px; }
+  .pill:hover { background: var(--line); }
+  #msgs { flex: 1 1 0; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .row { display: flex; flex-direction: column; align-items: flex-start; max-width: 78%; align-self: flex-start; }
+  .row.mine { align-self: flex-end; align-items: flex-end; }
+  .msg { padding: 9px 14px; border-radius: 18px 18px 18px 4px; background: var(--raise); white-space: pre-wrap; overflow-wrap: anywhere; animation: pop .2s ease-out; }
+  .row.mine .msg { background: var(--pink); color: #1d0610; border-radius: 18px 18px 4px 18px; }
+  .msg img { max-width: 100%; max-height: 320px; border-radius: 12px; display: block; }
+  .meta { font-size: 11px; color: var(--muted); margin: 2px 6px 0; white-space: pre; display: flex; gap: 6px; align-items: center; }
+  .tick { font-weight: 700; font-size: 15px; line-height: 1; }
+  .tick.off { color: #ff8a8a; }
+  .tick.sent { color: var(--muted); }
+  .tick.seen { color: var(--mint); }
+  .note { align-self: center; color: var(--muted); font-size: 13px; background: var(--panel); padding: 4px 12px; border-radius: 999px; text-align: center; max-width: 90%; }
+  .msg { cursor: pointer; }
+  .msg.gone { font-style: italic; opacity: .7; cursor: default; }
+  .reacts { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 4px 0; }
+  .reacts span { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; font-size: 13px; padding: 1px 7px; }
+  .row.mine .reacts { justify-content: flex-end; }
+  .sheet-bg { position: fixed; inset: 0; z-index: 60; background: rgba(5,4,14,.6); display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { background: var(--panel); border: 2px solid var(--line); border-radius: 20px 20px 0 0; width: 100%; max-width: 760px; padding: 14px 16px calc(20px + env(safe-area-inset-bottom, 0px)); }
+  .sheet .react-row { display: flex; gap: 6px; justify-content: space-around; margin-bottom: 10px; }
+  .sheet .react-row button { font-size: 26px; background: none; padding: 6px; }
+  .sheet .act { width: 100%; text-align: left; background: var(--raise); margin-top: 8px; border-radius: 12px; }
+  .sheet .act.del { color: #ff9a9a; }
+  .c4 { display: inline-grid; grid-template-columns: repeat(7, 1fr); gap: 4px; background: var(--raise); padding: 8px; border-radius: 14px; margin-bottom: 10px; max-width: 100%; }
+  .c4 .slot { width: min(11vw, 40px); height: min(11vw, 40px); border-radius: 50%; background: var(--bg); font-size: 0; padding: 0; border: 0; }
+  .c4 .slot.r { background: #ff5c6c; } .c4 .slot.y { background: var(--sun); }
+  .c4 .slot.win { box-shadow: 0 0 0 3px var(--mint); }
+
+  #game { display: none; background: var(--panel); border-top: 2px solid var(--line); padding: 14px 16px; text-align: center; position: relative; }
+  #game h3 { font-family: var(--fun); margin: 0 0 4px; color: var(--sun); }
+  #game .status { margin: 0 0 12px; }
+  #game .x-close { position: absolute; top: 10px; right: 12px; padding: 4px 11px; }
+  .grid { display: inline-grid; grid-template-columns: repeat(3, 64px); gap: 8px; margin-bottom: 10px; }
+  .cell { width: 64px; height: 64px; border-radius: 16px; background: var(--raise); font-size: 30px; padding: 0; }
+  .cell.win { background: var(--mint); }
+  .rps { display: flex; gap: 12px; justify-content: center; margin-bottom: 10px; }
+  .rps button { font-size: 36px; width: 74px; height: 74px; padding: 0; background: var(--raise); border-radius: 20px; }
+  .rps button.picked { background: var(--sun); }
+  .score { color: var(--muted); font-size: 14px; margin: 0; }
+
+  #emojis { padding: 4px 12px 0; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+  #emojis::-webkit-scrollbar { display: none; }
+  #emojis button { background: none; font-size: 24px; padding: 4px 6px; }
+  #chatsearch { display: flex; gap: 8px; align-items: center; padding: 8px 12px; background: var(--panel); border-bottom: 2px solid var(--line); }
+  #chatsearch input { flex: 1; }
+  #searchcount { color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .row.hidden-search { display: none; }
+  mark { background: var(--sun); color: #1d0610; border-radius: 3px; padding: 0 2px; }
+  #bar { display: flex; gap: 8px; padding: 12px; align-items: center; }
+  #mic.recording { background: #ff5c6c; color: #fff; animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: .5; } }
+  .voice { display: flex; align-items: center; gap: 8px; }
+  .voice audio { height: 34px; max-width: 190px; }
+  .rec-bar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--panel); color: var(--pink); font-size: 14px; }
+  #text { flex: 1; }
+
+  .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 10px); opacity: 0; pointer-events: none; background: var(--raise); border: 2px solid var(--line); border-radius: 14px; padding: 10px 16px; z-index: 40; transition: opacity .2s, transform .2s; max-width: calc(100% - 32px); text-align: center; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .confetti { position: fixed; top: -40px; pointer-events: none; z-index: 50; animation: fall 2.2s ease-in forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(540deg); } }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } }
+  @keyframes shake { 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+  .shake { animation: shake .45s; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+  /* ===== decoy math site ===== */
+  #decoy { position: fixed; inset: 0; z-index: 100; background: #f4f6fb; color: #1f2733; font-family: Georgia, "Times New Roman", serif; overflow-y: auto; }
+  .decoy-head { background: #2c5c8f; color: #fff; padding: 16px 20px; display: flex; align-items: baseline; gap: 12px; }
+  .decoy-logo { font-size: 22px; font-weight: bold; }
+  .decoy-sub { font-size: 13px; opacity: .85; }
+  .decoy-pad { max-width: 760px; margin: 0 auto; padding: 22px 18px 60px; }
+  .decoy-lead { font-size: 17px; color: #43506a; }
+  .decoy-cards { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; margin: 20px 0; }
+  @media (max-width: 560px) { .decoy-cards { grid-template-columns: 1fr; } }
+  .decoy-card { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; text-align: left; background: #fff; border: 1px solid #d3dae8; border-radius: 8px; padding: 20px; color: #1f2733; font-family: inherit; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .decoy-card:hover { border-color: #2c5c8f; }
+  .decoy-card b { font-size: 18px; }
+  .decoy-card span:last-child { font-size: 13px; color: #5a6678; }
+  .dc-emoji { font-size: 30px; }
+  .decoy-foot { color: #8a94a6; font-size: 13px; margin-top: 24px; }
+  .booklet-q { background: #fff; border: 1px solid #d3dae8; border-radius: 8px; padding: 16px 18px; margin-bottom: 14px; }
+  .booklet-q h4 { margin: 0 0 8px; color: #2c5c8f; }
+  .booklet-q .sol { margin-top: 8px; color: #2f6b3f; font-size: 14px; display: none; }
+  .booklet-q.open .sol { display: block; }
+  .booklet-q button { background: #eef2f8; color: #2c5c8f; border: 1px solid #d3dae8; border-radius: 6px; padding: 5px 12px; font-family: inherit; font-size: 13px; cursor: pointer; }
+  .mini-calc { background: #fff; border: 1px solid #d3dae8; border-radius: 8px; padding: 14px; margin-bottom: 18px; }
+  .mini-calc input { width: 100%; font-family: inherit; font-size: 16px; padding: 8px 10px; border: 1px solid #c3ccdb; border-radius: 6px; }
+  .mini-calc .out { margin-top: 8px; font-size: 15px; color: #2f6b3f; min-height: 1.2em; }
+  .decoy-back { background: #eef2f8; color: #2c5c8f; border: 1px solid #d3dae8; border-radius: 6px; padding: 6px 14px; font-family: inherit; cursor: pointer; margin-bottom: 16px; }
+  .gate { background: #fff; border: 1px solid #d3dae8; border-radius: 8px; padding: 18px; max-width: 340px; }
+  .gate input { width: 100%; font-family: inherit; font-size: 15px; padding: 9px 11px; border: 1px solid #c3ccdb; border-radius: 6px; margin-bottom: 10px; }
+  .gate button { background: #2c5c8f; color: #fff; border: 0; border-radius: 6px; padding: 9px 16px; font-family: inherit; cursor: pointer; }
+  .eom { background: #b45309 !important; color: #fff !important; }
+</style>
+</head>
+<body>
+
+<!-- ===== DECOY: boring math site shown first ===== -->
+<div id="decoy">
+  <div class="decoy-head">
+    <span class="decoy-logo">📐 Maths Resource</span>
+    <span class="decoy-sub">Practice & Tools</span>
+  </div>
+  <div id="decoy-home" class="decoy-pad">
+    <p class="decoy-lead">Welcome to your maths revision hub. Choose a tool below.</p>
+    <div class="decoy-cards">
+      <button class="decoy-card" onclick="showBooklet()">
+        <span class="dc-emoji">📘</span><b>Question Booklet</b>
+        <span>Worked examples in algebra, geometry & physics, with a built-in calculator.</span>
+      </button>
+      <button class="decoy-card" onclick="showCalcGate()">
+        <span class="dc-emoji">🧮</span><b>Calculator</b>
+        <span>Scientific calculator and saved workings.</span>
+      </button>
+    </div>
+    <p class="decoy-foot">Tip: press <b>Esc</b> any time to return to the booklet.</p>
+  </div>
+  <div id="decoy-booklet" class="decoy-pad" hidden></div>
+</div>
+
+<!-- ===== the real app ===== -->
+<div id="app-root" hidden>
+<div id="eom" class="notif" hidden></div>
+<div id="notif" class="notif" hidden></div>
+<div id="alert" class="warn" hidden>
+  <span id="alert-text"></span>
+  <button onclick="document.getElementById('alert').hidden = true">Got it</button>
+</div>
+
+<section id="screen-login" class="screen box active">
+  <h1 id="wordmark">Maths Resource</h1>
+  <span class="ver">v0.4</span>
+  <div id="login-step1" class="stack">
+    <input id="name" placeholder="Your codename" autocomplete="username" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter') loginNext()">
+    <button onclick="loginNext()">Next</button>
+  </div>
+  <div id="login-step2" class="stack" hidden>
+    <p id="login-hello" class="hint"></p>
+    <input id="pass1" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter') loginSubmit()">
+    <input id="pass2" type="password" autocomplete="new-password" placeholder="Type it again" onkeydown="if(event.key==='Enter') loginSubmit()">
+    <button id="login-btn" onclick="loginSubmit()">Log in</button>
+    <button id="forgot-btn" class="ghost" onclick="forgotPassword()">Forgot password?</button>
+    <button class="ghost" onclick="loginBack()">Back</button>
+  </div>
+  <p id="login-error" class="error"></p>
+</section>
+
+<section id="screen-home" class="screen">
+  <header class="bar-top">
+    <span class="logo">Maths Resource <small>0.4</small></span>
+    <span id="me-tag" class="me-tag"></span>
+    <button class="ghost small" onclick="openNicks()" aria-label="Nicknames">🏷️</button>
+    <button class="ghost small" onclick="openGuide()" aria-label="Guide">📖</button>
+    <button class="ghost small" onclick="cycleTheme()" aria-label="Theme">🎨</button>
+    <button class="ghost small" onclick="openProfile()" aria-label="Your profile">👤</button>
+    <button class="ghost small" onclick="location.reload()">Log out</button>
+  </header>
+  <div class="add">
+    <input id="friend" placeholder="Add a friend's codename" autocomplete="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter') addFriend()">
+    <button onclick="addFriend()">Add</button>
+  </div>
+  <div style="padding: 0 16px 6px;">
+    <button class="ghost small" onclick="openNotes()">📝 Notes to self</button>
+  </div>
+  <p class="section">Your chats</p>
+  <ul id="contacts" class="contacts"></ul>
+  <p id="no-contacts" class="hint center">No chats yet. Add your friend's codename above.</p>
+</section>
+
+<section id="screen-profile" class="screen">
+  <header class="bar-top">
+    <button class="ghost small" onclick="goHome()">Back</button>
+    <span class="logo">Profile</span>
+  </header>
+  <div class="profile">
+    <input type="file" id="pfp-file" accept="image/*" hidden onchange="onPfpPick()">
+    <div id="p-avatar"></div>
+    <h2 id="p-name"></h2>
+    <p id="p-status"></p>
+    <p id="p-created" class="hint"></p>
+    <p id="p-count" class="hint"></p>
+  </div>
+  <p class="section">Your chats</p>
+  <ul id="p-chats" class="contacts" style="flex: none"></ul>
+  <p class="section">Change password</p>
+  <div class="stack pw-box">
+    <input id="cp-old" type="password" autocomplete="current-password" placeholder="Current password">
+    <input id="cp-new1" type="password" autocomplete="new-password" placeholder="New password (6+ characters)">
+    <input id="cp-new2" type="password" autocomplete="new-password" placeholder="Type it again" onkeydown="if(event.key==='Enter') changePassword()">
+    <p id="cp-error" class="error"></p>
+    <button id="cp-btn" onclick="changePassword()">Change password</button>
+  </div>
+</section>
+
+<section id="screen-lock" class="screen box">
+  <button class="ghost small back" onclick="goHome()">Back</button>
+  <h2 id="lock-title"></h2>
+  <p id="lock-hint" class="hint"></p>
+  <p id="lock-waiting" class="waiting"></p>
+  <input id="pin" type="password" autocomplete="off" onkeydown="if(event.key==='Enter') submitPin()">
+  <p id="lock-error" class="error"></p>
+  <button id="lock-btn" onclick="submitPin()">Unlock</button>
+  <button id="new-chat-btn" class="ghost" onclick="newChat()">Start a new chat instead</button>
+</section>
+
+<section id="screen-nicks" class="screen">
+  <header class="bar-top">
+    <button class="ghost small" onclick="goHome()">Back</button>
+    <span class="logo">🏷️ Nicknames</span>
+  </header>
+  <div style="overflow-y:auto; padding: 12px 16px 40px;">
+    <p class="section">Your name (others see this)</p>
+    <div class="stack" style="gap:8px; margin-bottom:18px;">
+      <input id="mynick-box" placeholder="Your nickname (blank = your codename)" maxlength="24" autocomplete="off">
+      <label class="hint" style="display:flex; gap:8px; align-items:center;"><input type="checkbox" id="mynick-lock" style="width:auto"> 🔒 Lock my name so friends can't rename me</label>
+      <button onclick="saveMyNick()">Save my name</button>
+    </div>
+    <p class="section">Your friends</p>
+    <ul id="nick-list" class="contacts" style="flex:none;"></ul>
+  </div>
+</section>
+
+<section id="screen-guide" class="screen">
+  <header class="bar-top">
+    <button class="ghost small" onclick="goHome()">Back</button>
+    <span class="logo">📖 Guide</span>
+  </header>
+  <div id="guide-body" style="overflow-y:auto; padding: 8px 18px 40px;"></div>
+</section>
+
+<section id="screen-chat" class="screen">
+  <header class="bar-top">
+    <button class="ghost small" onclick="goHome()">Back</button>
+    <div class="peer"><b id="peer-name"></b><span id="peer-status"></span></div>
+    <button class="ghost small" onclick="toggleSearch()" aria-label="Search chat">🔍</button>
+    <button class="ghost small" onclick="lockChat()">🔒 Lock</button>
+  </header>
+  <div id="chatsearch" hidden>
+    <input id="searchbox" placeholder="Search this chat..." autocomplete="off" oninput="runChatSearch()">
+    <span id="searchcount"></span>
+  </div>
+  <div id="warn" class="warn" hidden>
+    <span>⚠️ Their security key changed. This might not be them. Check with them on a call before trusting it.</span>
+    <button onclick="trustKey(current)">Trust anyway</button>
+  </div>
+  <div id="tools">
+    <button class="pill" onclick="startTTT()">❌⭕ Tic-tac-toe</button>
+    <button class="pill" onclick="startRPS()">✂️ Rock Paper Scissors</button>
+    <button class="pill" onclick="startC4()">🔴🟡 Connect 4</button>
+    <button class="pill" onclick="nudge()">👋 Nudge</button>
+  </div>
+  <div id="msgs"></div>
+  <div id="game">
+    <button class="ghost x-close" onclick="closeGame()">✕</button>
+    <div id="game-body"></div>
+  </div>
+  <div id="emojis"></div>
+  <div id="bar">
+    <button class="ghost" onclick="document.getElementById('file').click()" aria-label="Send a photo">📷</button>
+    <input type="file" id="file" accept="image/*" hidden onchange="sendImage()">
+    <button class="ghost" id="mic" onclick="toggleRec()" aria-label="Record a voice note">🎤</button>
+    <input id="text" placeholder="Type a message" onkeydown="if(event.key==='Enter') sendText()">
+    <button onclick="sendText()">Send</button>
+  </div>
+</section>
+
+</div><!-- /app-root -->
+
+<div id="toast" class="toast" role="status"></div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const APP = 'maths-resource';
+  const PREFIX = 'deaddrop03-';   // 0.3 has its own network, old versions can't connect
+  const NS = 'dd3:';              // everything 0.3 saves starts with this. Keep it the same in future versions so history carries over.
+  const NAME_RE = /^[a-z0-9_]{3,30}$/;
+  const ID_RE = /^[a-z0-9]{8,40}$/i;
+  const validName = (n) => NAME_RE.test(n) && n !== '__proto__';
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const ECDH = { name: 'ECDH', namedCurve: 'P-256' };
+
+  let peer = null, me = '', acct = null, idPriv = null, current = null;
+  let lockMode = 'unlock', loginMode = 'login', loginName = '';
+  const conns = {}, trying = {}, sessions = {}, pendingNew = {}, saving = {};
+  const sharedCache = {}, strangerKeys = {}, keyWarn = {};
+  let rxQueue = Promise.resolve();
+
+  // ================= small helpers =================
+  function el(tag, text, cls) {
+    const e = document.createElement(tag);
+    if (text) e.textContent = text;
+    if (cls) e.className = cls;
+    return e;
+  }
+  function toast(t) {
+    const x = $('toast');
+    x.textContent = t;
+    x.classList.add('show');
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => x.classList.remove('show'), 3500);
+  }
+  function hue(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 360; return h; }
+  const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, '0')).join('');
+  const validImage = (s) => typeof s === 'string' && s.startsWith('data:image/') && s.length < 4e6;
+  const validJwk = (k) => k && typeof k === 'object' && k.kty === 'EC' && k.crv === 'P-256' && typeof k.x === 'string' && typeof k.y === 'string' && k.x.length < 100 && k.y.length < 100;
+  const cleanJwk = (k) => ({ kty: 'EC', crv: 'P-256', x: k.x, y: k.y });
+  const sameKey = (a, b) => a && b && a.x === b.x && a.y === b.y;
+  const scrollDown = () => { $('msgs').scrollTop = $('msgs').scrollHeight; };
+
+  function day(ts) {
+    return new Date(ts).toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  function stamp(ts) {
+    if (!ts) return '';
+    const d = new Date(ts), now = new Date();
+    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const yest = new Date(now); yest.setDate(now.getDate() - 1);
+    if (d.toDateString() === now.toDateString()) return 'Today ' + time;
+    if (d.toDateString() === yest.toDateString()) return 'Yesterday ' + time;
+    const opts = { day: 'numeric', month: 'short' };
+    if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
+    return d.toLocaleDateString([], opts) + ', ' + time;
+  }
+
+  // ================= storage =================
+  const K = {
+    last: () => `${NS}last`,
+    acct: (n) => `${NS}acct:${n}`,
+    fails: (n) => `${NS}fails:${n}`,
+    resets: (n) => `${NS}resets:${n}`,
+    people: () => `${NS}${me}:people`,
+    unread: () => `${NS}${me}:unread`,
+    vault: (f) => `${NS}${me}:vault:${f}`,
+    inbox: (f) => `${NS}${me}:inbox:${f}`,
+    seen: (f) => `${NS}${me}:seen:${f}`,
+    fp: (f) => `${NS}${me}:fp:${f}`,
+    mypfp: () => `${NS}${me}:mypfp`,
+    pfp: (f) => `${NS}${me}:pfp:${f}`,
+    mynick: () => `${NS}${me}:mynick`,      // {nick, locked}
+    theirnick: (f) => `${NS}${me}:theirnick:${f}`,   // nickname I gave them
+    theirself: (f) => `${NS}${me}:theirself:${f}`,   // {nick, locked} they told me
+  };
+  function load(k, fallback) {
+    try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; } catch { return fallback; }
+  }
+  function store(k, v) {
+    try { localStorage.setItem(k, JSON.stringify(v)); return true; }
+    catch { toast('Storage is full. Delete an old chat to make space.'); return false; }
+  }
+
+  // ================= encryption =================
+  function b64(buf) {
+    const a = new Uint8Array(buf);
+    let s = '';
+    for (let i = 0; i < a.length; i += 0x8000) s += String.fromCharCode.apply(null, a.subarray(i, i + 0x8000));
+    return btoa(s);
+  }
+  const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const newSalt = () => b64(crypto.getRandomValues(new Uint8Array(16)));
+
+  // Deterministic shared keypair for a 1-1 chat: same code + same pair of names => same keys on both sides.
+  function chatSeedSalt(f) { return enc.encode('mrchat:' + [me, f].sort().join('|')); }
+  async function sharedChatKeys(f, code) {
+    const base = await crypto.subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveBits']);
+    const bits = new Uint8Array(await crypto.subtle.deriveBits(
+      { name: 'PBKDF2', salt: chatSeedSalt(f), iterations: 200000, hash: 'SHA-256' }, base, 256));
+    const symKey = await crypto.subtle.importKey('raw', bits, 'AES-GCM', false, ['encrypt', 'decrypt']);
+    return { symKey };
+  }
+  // Non-reversible fingerprint of the shared code (safe to send; the code itself never travels).
+  async function codeFingerprint(f, code) {
+    const h = new Uint8Array(await crypto.subtle.digest('SHA-256',
+      enc.encode('mrfp:' + [me, f].sort().join('|') + ':' + code)));
+    return b64(h);
+  }
+
+  async function pinKey(pin, salt) {
+    const base = await crypto.subtle.importKey('raw', enc.encode(pin), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: unb64(salt), iterations: 250000, hash: 'SHA-256' },
+      base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  async function seal(key, obj) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(JSON.stringify(obj)));
+    return { iv: b64(iv), ct: b64(ct) };
+  }
+  async function unseal(key, box) {
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(box.iv) }, key, unb64(box.ct));
+    return JSON.parse(dec.decode(pt));
+  }
+  // Key shared between you and one friend. Only the real friend (with their password) can use it,
+  // so someone who steals their codename still can't read or fake messages.
+  async function sharedFor(jwk) {
+    const id = jwk.x + jwk.y;
+    if (!sharedCache[id]) {
+      const pub = await crypto.subtle.importKey('jwk', cleanJwk(jwk), ECDH, false, []);
+      sharedCache[id] = await crypto.subtle.deriveKey({ name: 'ECDH', public: pub }, idPriv, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+    }
+    return sharedCache[id];
+  }
+  // Messages that arrive while a chat is locked are sealed with that chat's public key.
+  async function sealForInbox(pubJwk, obj) {
+    const pub = await crypto.subtle.importKey('jwk', cleanJwk(pubJwk), ECDH, false, []);
+    const eph = await crypto.subtle.generateKey(ECDH, true, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey({ name: 'ECDH', public: pub }, eph.privateKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
+    const box = await seal(key, obj);
+    box.epk = cleanJwk(await crypto.subtle.exportKey('jwk', eph.publicKey));
+    return box;
+  }
+  async function openInbox(priv, box) {
+    const epk = await crypto.subtle.importKey('jwk', box.epk, ECDH, false, []);
+    const key = await crypto.subtle.deriveKey({ name: 'ECDH', public: epk }, priv, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+    return unseal(key, box);
+  }
+
+  // ================= clean out older versions =================
+  // Removes chats and history saved by Deaddrop versions before 0.3. Anything from 0.3 onwards stays.
+  for (const k of Object.keys(localStorage)) {
+    if (!k.startsWith(NS) && (k.startsWith('dd:') || k.startsWith('deaddrop-'))) localStorage.removeItem(k);
+  }
+
+  // ================= login =================
+  $('name').value = localStorage.getItem(K.last()) || '';
+
+  function loginNext() {
+    const name = $('name').value.trim().toLowerCase();
+    $('login-error').textContent = '';
+    if (!validName(name)) { $('login-error').textContent = 'Use 3-30 letters, numbers or _ (no spaces)'; return; }
+    if (!window.crypto || !crypto.subtle) { $('login-error').textContent = 'Open this from your https:// link so encryption works.'; return; }
+    if (typeof Peer === 'undefined') { $('login-error').textContent = 'Could not load. Check your internet and refresh.'; return; }
+    loginName = name;
+    const exists = !!localStorage.getItem(K.acct(name));
+    loginMode = exists ? 'login' : 'create';
+    $('login-step1').hidden = true;
+    $('login-step2').hidden = false;
+    $('login-hello').textContent = exists
+      ? `Welcome back, ${name} 👋 Enter your password.`
+      : `New here? Make a password for ${name}. ⚠️ WRITE IT DOWN! It can only be reset from inside Profile while logged in.`;
+    $('pass1').value = '';
+    $('pass2').value = '';
+    $('pass1').placeholder = exists ? 'Password' : 'Create a password (6+ characters)';
+    $('pass2').hidden = exists;
+    $('login-btn').textContent = exists ? 'Log in' : 'Create account';
+    $('forgot-btn').hidden = !exists;
+    setTimeout(() => $('pass1').focus(), 50);
+  }
+
+  // Login screen can't reset. It only flags the account and alerts the real owner.
+  function forgotPassword() {
+    const at = Date.now();
+    const list = load(K.resets(loginName), []); list.push(at); store(K.resets(loginName), list.slice(-20));
+    if (alerts) alerts.postMessage({ kind: 'reset-attempt', name: loginName, at });
+    $('login-error').textContent = '';
+    $('login-hello').textContent = `Passwords can't be reset here. Only the owner can reset it from inside Profile while logged in. This attempt was flagged on ${loginName}'s account.`;
+    $('forgot-btn').hidden = true;
+  }
+
+  // Failed login alerts: saved for your next login, and sent live to any tab where you're logged in
+  const alerts = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('dd3-alerts') : null;
+  if (alerts) alerts.onmessage = (e) => {
+    const d = e.data || {};
+    if (me && d.name === me && d.kind === 'fail') localStorage.removeItem(K.fails(me)), showAlert(`⚠️ Someone just tried to log in as you with the wrong password (${stamp(d.at)}).`);
+    if (me && d.name === me && d.kind === 'reset-attempt') { localStorage.removeItem(K.resets(me)); showAlert(`⚠️ Someone tried to reset your password from the login screen (${stamp(d.at)}). They could NOT get in.`); }
+  };
+  function showAlert(text) {
+    $('alert-text').textContent = text;
+    $('alert').hidden = false;
+    blip(300);
+  }
+  function recordFail(name) {
+    const at = Date.now();
+    const list = load(K.fails(name), []);
+    list.push(at);
+    store(K.fails(name), list.slice(-20));
+    if (alerts) alerts.postMessage({ kind: 'fail', name, at });
+  }
+
+  function loginBack() {
+    $('login-step1').hidden = false;
+    $('login-step2').hidden = true;
+    $('login-error').textContent = '';
+  }
+
+  async function loginSubmit() {
+    const p1 = $('pass1').value, p2 = $('pass2').value, err = $('login-error');
+    err.textContent = '';
+    if (loginMode === 'create') {
+      if (p1.length < 6) { err.textContent = 'Use at least 6 characters.'; return; }
+      if (p1 !== p2) { err.textContent = "Passwords don't match."; return; }
+    } else if (!p1) { err.textContent = 'Enter your password.'; return; }
+
+    const btn = $('login-btn'), label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Checking...';
+    try {
+      let privJwk;
+      if (loginMode === 'create') {
+        const salt = newSalt();
+        const key = await pinKey(p1, salt);
+        const kp = await crypto.subtle.generateKey(ECDH, true, ['deriveKey']);
+        privJwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+        const pub = cleanJwk(await crypto.subtle.exportKey('jwk', kp.publicKey));
+        acct = { created: Date.now(), salt, pub, priv: await seal(key, privJwk) };
+      } else {
+        acct = load(K.acct(loginName), null);
+        const key = await pinKey(p1, acct.salt);
+        try { privJwk = await unseal(key, acct.priv); }
+        catch { recordFail(loginName); throw new Error('Wrong password. Try again.'); }
+      }
+      idPriv = await crypto.subtle.importKey('jwk', privJwk, ECDH, false, ['deriveKey']);
+      $('pass1').value = '';
+      $('pass2').value = '';
+      goOnline(loginName);
+    } catch (e) {
+      err.textContent = e.message || 'Something went wrong. Try again.';
+      btn.disabled = false;
+      btn.textContent = label;
+    }
+  }
+
+  // ================= going online =================
+  const netOnline = () => !!(peer && peer.open && !peer.disconnected);
+
+  function goOnline(name) {
+    $('login-error').textContent = 'Going online...';
+    peer = new Peer(PREFIX + name);
+    peer.on('open', () => {
+      refresh();
+      if (me) { contacts().forEach(dial); return; }
+      me = name;
+      if (loginMode === 'create') store(K.acct(me), acct);
+      const fails = load(K.fails(me), []); const resets = load(K.resets(me), []);
+      localStorage.removeItem(K.fails(me)); localStorage.removeItem(K.resets(me));
+      const bits = [];
+      if (fails.length) bits.push(`${fails.length} wrong-password attempt${fails.length>1?'s':''}`);
+      if (resets.length) bits.push(`${resets.length} reset attempt${resets.length>1?'s':''}`);
+      if (bits.length) showAlert(`⚠️ Since you last logged in: ${bits.join(' and ')}. Nobody got in.`);
+      localStorage.setItem(K.last(), me);
+      goHome();
+      contacts().forEach(dial);
+      setInterval(() => {
+        contacts().forEach(dial);
+        Object.keys(sessions).forEach(flush); // resend anything not confirmed yet
+      }, 6000);
+    });
+    peer.on('connection', setupConn);
+    peer.on('disconnected', () => {
+      refresh();
+      setTimeout(() => { if (peer && !peer.destroyed && peer.disconnected) peer.reconnect(); }, 3000);
+    });
+    peer.on('error', (err) => {
+      if (err.type === 'peer-unavailable') { // that friend is offline, try again soon
+        const hit = String(err.message || '').match(/deaddrop03-([a-z0-9_]+)/);
+        if (hit) trying[hit[1]] = false;
+        return;
+      }
+      if (!me) {
+        $('login-btn').disabled = false;
+        $('login-btn').textContent = loginMode === 'create' ? 'Create account' : 'Log in';
+        $('login-error').textContent = err.type === 'unavailable-id'
+          ? `Someone is already online as ${name}. If that's you in another tab, close it first.`
+          : 'Could not go online. Check your internet.';
+        peer.destroy();
+        peer = null;
+      } else {
+        refresh();
+      }
+    });
+  }
+
+  // ================= connections =================
+  const isOnline = (f) => !!(conns[f] && conns[f].open && conns[f]._ok);
+
+  function dial(f) {
+    if (!peer || peer.disconnected || isOnline(f) || trying[f]) return;
+    trying[f] = true;
+    const c = peer.connect(PREFIX + f, { reliable: true });
+    setupConn(c);
+    setTimeout(() => { trying[f] = false; if (!c.open) c.close(); }, 12000);
+  }
+
+  function setupConn(c) {
+    const f = String(c.peer || '').slice(PREFIX.length);
+    if (!validName(f) || f === me) { c.close(); return; }
+    c.on('open', () => {
+      try { c.send({ type: 'hello', v: 2, key: acct.pub }); } catch {}
+      if (c._ok) { conns[f] = c; refresh(); flush(f); }
+    });
+    c.on('data', (m) => { rxQueue = rxQueue.then(() => onData(f, m, c)).catch(() => {}); });
+    c.on('close', () => { if (conns[f] === c) { delete conns[f]; refresh(); } });
+    c.on('error', () => {});
+  }
+
+  async function handleHello(f, key, c) {
+    if (!validJwk(key)) return;
+    const k = cleanJwk(key);
+    const p = people()[f];
+    if (p && p.key && !sameKey(p.key, k)) {
+      keyWarn[f] = { key: k, conn: c };
+      refresh();
+      toast(`⚠️ ${f}'s security key changed. This might not be them.`);
+      return;
+    }
+    await sharedFor(k);
+    if (p && !p.key) { const all = people(); all[f].key = k; savePeople(all); }
+    if (!p) strangerKeys[f] = k;
+    delete keyWarn[f];
+    c._ok = true;
+    c._key = k;
+    if (c.open) { conns[f] = c; refresh(); flush(f); if (eomOn) broadcastEom(f, true); const mp = load(K.mypfp(), null); if (mp) sendTo(f, { type: 'pfp', data: mp }); const mn = load(K.mynick(), null); if (mn && (mn.nick || mn.locked)) sendTo(f, { type: 'myname', nick: mn.nick, locked: mn.locked }); }
+  }
+
+  async function trustKey(f) {
+    const w = keyWarn[f];
+    if (!w) return;
+    if (!confirm(`Only trust this if you've checked with ${f} on a call or in person. Trust their new key?`)) return;
+    const all = people();
+    if (all[f]) { all[f].key = w.key; savePeople(all); }
+    delete keyWarn[f];
+    await handleHello(f, w.key, w.conn);
+    toast('Key trusted ✅');
+  }
+
+  async function sendTo(f, obj) {
+    const c = conns[f];
+    if (!c || !c.open || !c._ok) return false;
+    try { c.send({ box: await seal(await sharedFor(c._key), obj) }); return true; }
+    catch { return false; }
+  }
+
+  async function onData(f, m, c) {
+    if (!m || typeof m !== 'object') return;
+    if (m.type === 'hello') return handleHello(f, m.key, c);
+    if (!c._ok || !m.box) return;
+    let inner;
+    try { inner = await unseal(await sharedFor(c._key), m.box); } catch { return; }
+    if (!inner || typeof inner !== 'object') return;
+
+    if (inner.type === 'chat') return receiveChat(f, inner);
+    if (inner.type === 'ack') { if (typeof inner.id === 'string') onAck(f, inner.id); return; }
+    if (inner.type === 'read') return onRead(f, inner.ids);
+    if (inner.type === 'react') return onReact(f, inner.id, inner.emo);
+    if (inner.type === 'unsend') return onUnsend(f, inner.id);
+    if (inner.type === 'eom') return onEom(f, inner.on);
+    if (inner.type === 'pfp') return onPfp(f, inner.data);
+    if (inner.type === 'myname') return onMyName(f, inner.nick, inner.locked);
+    if (inner.type === 'renamed') return onRenamed(f, inner.nick);
+    if (!people()[f]) return;
+
+    const chatOpen = current === f && sessions[f] && $('screen-chat').classList.contains('active');
+    if (!chatOpen) {
+      if (inner.type === 'nudge') { shake(); blip(300); toast(f + ' nudged you! 👋'); }
+      else if (inner.action === 'start') { blip(); toast(f + ' wants to play! Open your chat and start a game.'); }
+      return;
+    }
+    if (inner.type === 'ttt') onTTT(inner);
+    else if (inner.type === 'rps') onRPS(inner);
+    else if (inner.type === 'c4') onC4(inner);
+    else if (inner.type === 'nudge') onNudge();
+  }
+
+  // ================= people =================
+  function people() {
+    if (!me) return {};
+    return load(K.people(), {});
+  }
+  const savePeople = (p) => store(K.people(), p);
+  const isRequest = (f) => !!pendingNew[f] && !localStorage.getItem(K.vault(f));
+
+  function contacts() {
+    const p = people();
+    return Object.keys(p).filter(validName).sort((a, b) => {
+      if (isRequest(a) !== isRequest(b)) return isRequest(a) ? -1 : 1;
+      return (p[b].lastAt || p[b].added || 0) - (p[a].lastAt || p[a].added || 0);
+    });
+  }
+  function addContact(f, key) {
+    const p = people();
+    if (!p[f]) p[f] = { key: key || null, added: Date.now(), lastAt: 0 };
+    else if (key && !p[f].key) p[f].key = key;
+    else return;
+    savePeople(p);
+  }
+  function touch(f) {
+    const p = people();
+    if (p[f]) { p[f].lastAt = Date.now(); savePeople(p); }
+  }
+
+  function addFriend() {
+    const f = $('friend').value.trim().toLowerCase();
+    if (!validName(f)) return toast('Codenames are 3-30 letters, numbers or _');
+    if (f === me) return toast("That's you 😄");
+    $('friend').value = '';
+    addContact(f, strangerKeys[f]);
+    dial(f);
+    openContact(f);
+  }
+
+  function deleteContact(f) {
+    if (!confirm(`Delete ${f} and all your messages with them? This can't be undone.`)) return;
+    const p = people();
+    delete p[f];
+    savePeople(p);
+    for (const k of [K.vault(f), K.inbox(f), K.seen(f), K.fp(f), K.pfp(f), K.theirnick(f), K.theirself(f)]) localStorage.removeItem(k);
+    const u = load(K.unread(), {});
+    delete u[f];
+    store(K.unread(), u);
+    delete sessions[f];
+    delete pendingNew[f];
+    delete keyWarn[f];
+    if (conns[f]) conns[f].close();
+    delete conns[f];
+    goHome();
+    toast(f + ' deleted 🧹');
+  }
+
+  const cleanNick = (x) => typeof x === 'string' ? x.trim().slice(0, 24) : '';
+  function disp(f) {
+    if (isNotes(f)) return 'Notes to self';
+    const self = load(K.theirself(f), null);      // {nick, locked}
+    const mine = cleanNick(load(K.theirnick(f), ''));
+    if (self && self.locked && cleanNick(self.nick)) return cleanNick(self.nick);
+    if (self && cleanNick(self.nick)) return cleanNick(self.nick);
+    if (mine) return mine;
+    return f;
+  }
+  const hasNick = (f) => disp(f) !== f && !isNotes(f);
+
+  function pfpFor(f) {
+    if (f === me || f === SELF) return load(K.mypfp(), null);
+    return load(K.pfp(f), null);
+  }
+  function avatar(f, on, big) {
+    const a = el('span', '', 'avatar' + (big ? ' big' : ''));
+    const pic = pfpFor(f);
+    if (pic && validImage(pic)) {
+      a.style.backgroundImage = `url(${pic})`;
+      a.style.backgroundSize = 'cover';
+      a.style.backgroundPosition = 'center';
+    } else {
+      a.textContent = f[0].toUpperCase();
+      a.style.background = `hsl(${hue(f)} 80% 72%)`;
+    }
+    a.append(el('span', '', 'dot' + (on ? ' on' : '')));
+    return a;
+  }
+
+  function statusLine(f) {
+    if (keyWarn[f]) return '⚠️ Security key changed';
+    if (sessions[f]) return '🔓 Open';
+    if (isRequest(f)) return '💌 Chat request';
+    const v = load(K.vault(f), null);
+    if (v) return '🔒 Locked' + (v.created ? ', since ' + day(v.created) : '');
+    return '✨ New chat';
+  }
+
+  function renderContacts() {
+    if (!me) return;
+    const list = contacts(), u = load(K.unread(), {});
+    $('contacts').replaceChildren(...list.map((f) => {
+      const li = el('li', '', 'contact' + (isRequest(f) ? ' request' : ''));
+      const open = el('button', '', 'open');
+      open.onclick = () => openContact(f);
+      const who = el('div', '', 'who');
+      const nameEl = el('b', disp(f));
+      who.append(nameEl);
+      if (hasNick(f)) { const real = el('span', '@' + f); real.style.opacity='.7'; who.append(real); }
+      who.append(el('span', statusLine(f)));
+      open.append(avatar(f, isOnline(f)), who);
+      if (u[f]) open.append(el('span', String(u[f]), 'badge'));
+      const del = el('button', '🗑', 'danger');
+      del.title = 'Delete ' + f;
+      del.setAttribute('aria-label', 'Delete ' + f);
+      del.onclick = () => deleteContact(f);
+      li.append(open, del);
+      return li;
+    }));
+    $('no-contacts').hidden = list.length > 0;
+  }
+
+  function refresh() {
+    if (!me) return;
+    const on = netOnline();
+    $('me-tag').textContent = (on ? '🟢 ' : '🔴 ') + me + (on ? '' : ' (reconnecting...)');
+    renderContacts();
+    renderNotif();
+    updateStatus();
+    if ($('screen-profile').classList.contains('active')) renderProfile();
+  }
+
+  // ================= profile =================
+  function openProfile() { renderProfile(); show('profile'); }
+
+  function renderProfile() {
+    const on = netOnline();
+    const av = avatar(me, on, true);
+    av.style.cursor = 'pointer';
+    av.title = 'Tap to change your picture';
+    av.onclick = () => $('pfp-file').click();
+    const wrap = el('div', '', '');
+    wrap.style.position = 'relative';
+    wrap.append(av);
+    const edit = el('span', '📷', '');
+    edit.style.cssText = 'position:absolute;right:-2px;bottom:-2px;background:var(--pink);border-radius:50%;padding:4px 6px;font-size:13px;cursor:pointer;';
+    edit.onclick = () => $('pfp-file').click();
+    wrap.append(edit);
+    $('p-avatar').replaceChildren(wrap);
+    if (load(K.mypfp(), null)) {
+      const rm = el('button', 'Remove picture', 'ghost small');
+      rm.style.marginTop = '6px';
+      rm.onclick = removePfp;
+      // place remove under the name area via p-created slot is taken; add to avatar wrap
+      $('p-avatar').append(rm);
+    }
+    $('p-name').textContent = me;
+    $('p-status').textContent = on ? '🟢 Online' : '🔴 Offline, reconnecting...';
+    $('p-status').className = on ? 'on' : '';
+    $('p-created').textContent = acct && acct.created ? 'Account created ' + day(acct.created) : '';
+    const list = contacts();
+    $('p-count').textContent = list.length + (list.length === 1 ? ' chat' : ' chats');
+    $('p-chats').replaceChildren(...list.map((f) => {
+      const v = load(K.vault(f), null);
+      const li = el('li', '', 'contact');
+      const open = el('button', '', 'open');
+      open.onclick = () => openContact(f);
+      const who = el('div', '', 'who');
+      let info = v ? (v.created ? 'Chat started ' + day(v.created) : 'Chat started') : isRequest(f) ? '💌 Wants to chat' : 'Not started yet';
+      info += isOnline(f) ? ', online now' : '';
+      who.append(el('b', f), el('span', info));
+      open.append(avatar(f, isOnline(f)), who);
+      li.append(open);
+      return li;
+    }));
+  }
+
+  async function changePassword() {
+    const oldPw = $('cp-old').value, n1 = $('cp-new1').value, n2 = $('cp-new2').value, err = $('cp-error');
+    err.textContent = '';
+    if (!oldPw) { err.textContent = 'Enter your current password.'; return; }
+    if (n1.length < 6) { err.textContent = 'New password needs at least 6 characters.'; return; }
+    if (n1 !== n2) { err.textContent = "New passwords don't match."; return; }
+    const btn = $('cp-btn');
+    btn.disabled = true;
+    btn.textContent = 'Changing...';
+    try {
+      let privJwk;
+      try { privJwk = await unseal(await pinKey(oldPw, acct.salt), acct.priv); }
+      catch { throw new Error('Current password is wrong.'); }
+      const salt = newSalt();
+      acct = { ...acct, salt, priv: await seal(await pinKey(n1, salt), privJwk) };
+      store(K.acct(me), acct);
+      for (const id of ['cp-old', 'cp-new1', 'cp-new2']) $(id).value = '';
+      toast('Password changed ✅');
+    } catch (e) {
+      err.textContent = e.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Change password';
+    }
+  }
+
+  // ================= notifications =================
+  function bumpUnread(f, exact) {
+    const u = load(K.unread(), {});
+    u[f] = exact !== undefined ? exact : (u[f] || 0) + 1;
+    store(K.unread(), u);
+    refresh();
+    if ($('screen-lock').classList.contains('active') && current === f) showWaiting(f);
+  }
+
+  function renderNotif() {
+    const bar = $('notif');
+    const u = me ? load(K.unread(), {}) : {};
+    const chatOpen = $('screen-chat').classList.contains('active') ? current : null;
+    const items = Object.entries(u).filter(([f, n]) => n > 0 && f !== chatOpen);
+    const total = Object.values(u).reduce((a, n) => a + n, 0);
+    document.title = total ? `(${total}) ${APP}` : APP;
+    bar.hidden = items.length === 0;
+    if (!items.length) return;
+    const count = items.reduce((a, [, n]) => a + n, 0);
+    bar.replaceChildren(el('span', `🔔 ${count} new message${count > 1 ? 's' : ''}`));
+    for (const [f, n] of items) {
+      const b = el('button', `${isRequest(f) ? '💌 ' : ''}${f} (${n})`);
+      b.onclick = () => openContact(f);
+      bar.append(b);
+    }
+  }
+
+  // ================= screens =================
+  function show(screen) {
+    for (const s of document.querySelectorAll('.screen')) s.classList.toggle('active', s.id === 'screen-' + screen);
+    renderNotif();
+  }
+  function goHome() {
+    current = null;
+    closeGame();
+    refresh();
+    show('home');
+  }
+
+  // ================= chat vaults =================
+  // A tiny check value lets us tell a wrong shared code from an empty history.
+  async function createVault(f, pin) {
+    const expected = load(K.fp(f), null);
+    const fp = await codeFingerprint(f, pin);
+    if (expected && expected !== fp) throw new Error('wrong');
+    const { symKey } = await sharedChatKeys(f, pin);
+    const waiting = pendingNew[f] || [];
+    const history = [...waiting];
+    const check = await seal(symKey, 'ok');
+    // stable inbox keypair for messages that arrive while locked
+    const kp = await crypto.subtle.generateKey(ECDH, true, ['deriveKey']);
+    const pub = cleanJwk(await crypto.subtle.exportKey('jwk', kp.publicKey));
+    const privJwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+    const ok = store(K.vault(f), { created: Date.now(), shared: true, check, pub, priv: await seal(symKey, privJwk), history: await seal(symKey, history) });
+    if (!ok) throw new Error('Storage is full.');
+    sessions[f] = { key: symKey, history };
+    chatFp[f] = fp;
+    if (!load(K.fp(f), null)) store(K.fp(f), fp);
+    delete pendingNew[f];
+    const seen = load(K.seen(f), []);
+    for (const m of waiting) { seen.push(m.id); sendTo(f, { type: 'ack', id: m.id }); }
+    store(K.seen(f), seen.slice(-500));
+  }
+
+  async function unlockVault(f, pin) {
+    const v = load(K.vault(f), null);
+    const expected = load(K.fp(f), null);
+    const fp = await codeFingerprint(f, pin);
+    if (expected && expected !== fp) throw new Error('wrong');
+    const { symKey } = await sharedChatKeys(f, pin);
+    if (v.check) { try { await unseal(symKey, v.check); } catch { throw new Error('wrong'); } }
+    chatFp[f] = fp;
+    let history = [];
+    if (v.history) { try { history = await unseal(symKey, v.history); } catch { history = []; } }
+    // open offline messages sealed to the inbox public key
+    const inbox = load(K.inbox(f), []);
+    if (inbox.length && v.priv) {
+      try {
+        const privJwk = await unseal(symKey, v.priv);
+        const priv = await crypto.subtle.importKey('jwk', privJwk, ECDH, false, ['deriveKey']);
+        for (const box of inbox) { try { history.push(await openInbox(priv, box)); } catch {} }
+      } catch {}
+    }
+    sessions[f] = { key: symKey, history };
+    if (inbox.length) { await saveHistory(f); localStorage.removeItem(K.inbox(f)); }
+  }
+
+  function saveHistory(f) {
+    saving[f] = (saving[f] || Promise.resolve()).then(async () => {
+      const s = sessions[f], v = load(K.vault(f), null);
+      if (!s || !v) return;
+      v.history = await seal(s.key, s.history);
+      store(K.vault(f), v);
+    }).catch(() => {});
+    return saving[f];
+  }
+
+  // ================= lock screen =================
+  function showWaiting(f) {
+    const n = load(K.unread(), {})[f] || 0;
+    $('lock-waiting').textContent = n ? `📬 ${n} new message${n > 1 ? 's' : ''} waiting inside` : '';
+  }
+
+  function openContact(f) {
+    current = f;
+    if (sessions[f]) return openChat(f);
+    const v = load(K.vault(f), null);
+    lockMode = v ? 'unlock' : 'create';
+    const unlock = lockMode === 'unlock';
+    $('lock-title').textContent = (unlock ? '🔒 ' : isRequest(f) ? '💌 ' : '✨ ') + f;
+    $('lock-hint').textContent = unlock
+      ? 'Enter the shared code for this chat.' + (v.created ? ' Chat started ' + day(v.created) + '.' : '')
+      : (isRequest(f) ? `${f} wants to chat! Agree a code together (in person) and both enter the SAME one. ` : 'Pick a code and share it with your friend in person. You BOTH enter the SAME code to open this chat.');
+    $('pin').value = '';
+    $('pin').placeholder = unlock ? 'Shared code' : 'Shared code (4+ characters)';
+    $('lock-error').textContent = '';
+    $('lock-btn').textContent = unlock ? 'Unlock' : 'Create chat';
+    $('new-chat-btn').hidden = !unlock;
+    showWaiting(f);
+    show('lock');
+    setTimeout(() => $('pin').focus(), 50);
+  }
+
+  async function submitPin() {
+    const f = current, pin = $('pin').value;
+    if (pin.length < 4) { $('lock-error').textContent = 'Use at least 4 characters.'; return; }
+    const btn = $('lock-btn'), label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = lockMode === 'unlock' ? 'Unlocking...' : 'Creating...';
+    try {
+      if (lockMode === 'unlock') await unlockVault(f, pin);
+      else { addContact(f, strangerKeys[f]); await createVault(f, pin); }
+      if (current === f) openChat(f);
+    } catch (e) {
+      $('lock-error').textContent = (e.message === 'wrong')
+        ? 'That code does not match the one your friend used. Ask them and enter the SAME code.'
+        : (lockMode === 'unlock' ? 'That code does not match this chat. Retype it.' : 'Could not create the chat. ' + (e.message || ''));
+    } finally {
+      btn.disabled = false;
+      btn.textContent = label;
+    }
+  }
+
+  function newChat() {
+    const f = current;
+    if (!confirm(`Start a new chat with ${f}? Your old history and any unread messages will be deleted.`)) return;
+    localStorage.removeItem(K.vault(f));
+    localStorage.removeItem(K.inbox(f));
+    localStorage.removeItem(K.fp(f));
+    const u = load(K.unread(), {});
+    delete u[f];
+    store(K.unread(), u);
+    openContact(f);
+  }
+
+  function lockChat() {
+    delete sessions[current];
+    goHome();
+    toast('Chat locked 🔒');
+  }
+
+  // ================= chat =================
+  function openChat(f) {
+    current = f;
+    ttt = null;
+    rps = { mine: null, theirs: null, result: '' };
+    score.me = 0; score.them = 0;
+    closeGame();
+    const u = load(K.unread(), {});
+    if (u[f]) { delete u[f]; store(K.unread(), u); }
+    $('peer-name').textContent = isNotes(f) ? '📝 Notes to self' : disp(f);
+    const intro = isNotes(f) ? '📝 Private notes, saved only on this device' :
+      '🔒 ' + ((load(K.vault(f), null) || {}).created ? 'Chat started ' + day((load(K.vault(f), null)).created) + '. ' : '') + 'Locked with your code on this device';
+    $('msgs').replaceChildren(el('div', intro, 'note'));
+    sessions[f].history.forEach(addBubble);
+    $('tools').style.display = isNotes(f) ? 'none' : '';
+    $('mic').style.display = '';
+    $('chatsearch').hidden = true; $('searchbox').value = '';
+    show('chat');
+    refresh();
+    scrollDown();
+    if (!isNotes(f)) { flush(f); markRead(f); if (!isOnline(f)) dial(f); }
+  }
+
+  function updateStatus() {
+    if (!current || !me) return;
+    if (isNotes(current)) { $('peer-status').textContent = 'Only you'; $('peer-status').className = ''; $('warn').hidden = true; return; }
+    const on = isOnline(current);
+    $('peer-status').textContent = on ? '🟢 Online' : 'Offline. Messages send when they are back';
+    $('peer-status').className = on ? 'on' : '';
+    $('warn').hidden = !keyWarn[current];
+    refreshTicks();
+  }
+
+  function note(text) {
+    $('msgs').append(el('div', text, 'note'));
+    scrollDown();
+  }
+
+  // Read receipts: ✕ they're offline, – got it but not seen, ✓ seen
+  function tickFor(m) {
+    if (m.status === 'read') return ['✓', 'seen', 'Seen'];
+    if (m.status === 'delivered' || isOnline(current)) return ['–', 'sent', 'Delivered, not seen yet'];
+    return ['✕', 'off', 'Not delivered yet, they are offline'];
+  }
+  function fillMeta(meta, m) {
+    meta.replaceChildren(el('span', stamp(m.at)));
+    if (!m.mine) return;
+    const [icon, cls, label] = tickFor(m);
+    const t = el('span', icon, 'tick ' + cls);
+    t.title = label;
+    t.setAttribute('aria-label', label);
+    meta.append(t);
+  }
+  function refreshTicks() {
+    const s = sessions[current];
+    if (!s || !$('screen-chat').classList.contains('active')) return;
+    for (const m of s.history) {
+      if (!m.mine) continue;
+      const meta = $('msgs').querySelector(`[data-id="${m.id}"] .meta`);
+      if (meta) fillMeta(meta, m);
+    }
+  }
+
+  function renderReacts(row, m) {
+    let box = row.querySelector('.reacts');
+    const entries = Object.entries(m.reacts || {}).filter(([, v]) => v);
+    if (!entries.length) { if (box) box.remove(); return; }
+    if (!box) { box = el('div', '', 'reacts'); row.insertBefore(box, row.querySelector('.meta')); }
+    box.replaceChildren(...entries.map(([who, emo]) => el('span', emo)));
+  }
+  function paintBubble(b, m) {
+    b.replaceChildren();
+    b.classList.toggle('gone', !!m.gone);
+    if (m.gone) { b.append(document.createTextNode('🚫 message unsent')); return; }
+    if (validImage(m.image)) { const img=new Image(); img.src=m.image; img.alt='Photo'; img.onload=scrollDown; b.append(img); }
+    if (validVoice(m.voice)) { const w=el('div','','voice'); const au=document.createElement('audio'); au.controls=true; au.src=m.voice; w.append(el('span','🎤'), au); b.append(w); }
+    if (m.text) b.append(document.createTextNode(m.text));
+  }
+  const validVoice = (v) => typeof v === 'string' && v.startsWith('data:audio/') && v.length < 3e6;
+  function redrawMsg(m) {
+    const row = $('msgs').querySelector(`[data-id="${m.id}"]`);
+    if (!row) return;
+    paintBubble(row.querySelector('.msg'), m); renderReacts(row, m);
+  }
+  function addBubble(m) {
+    const row = el('div', '', 'row' + (m.mine ? ' mine' : ''));
+    row.dataset.id = m.id;
+    const b = el('div', '', 'msg');
+    paintBubble(b, m);
+    b.onclick = () => openMsgMenu(m);
+    const meta = el('span', '', 'meta');
+    fillMeta(meta, m);
+    row.append(b, meta); renderReacts(row, m);
+    $('msgs').append(row);
+  }
+
+  const wire = (m) => ({ type: 'chat', id: m.id, text: m.text, image: m.image, voice: m.voice || null, at: m.at, fp: chatFp[current] || null });
+  const chatFp = {}; // our own code fingerprint per chat, kept in memory while unlocked
+
+  function flush(f) {
+    const s = sessions[f];
+    if (!s || !isOnline(f)) return;
+    for (const m of s.history) if (m.mine && m.status === 'sending') sendTo(f, wire(m));
+    markRead(f);
+  }
+
+  async function sendChat(content) {
+    const f = current, s = sessions[f];
+    if (!s) return;
+    const m = { id: rid(), mine: true, text: content.text || '', image: content.image || null, voice: content.voice || null, at: Date.now(), status: isNotes(f) ? 'read' : 'sending', reacts: {} };
+    s.history.push(m);
+    addBubble(m);
+    scrollDown();
+    if (!isNotes(f)) touch(f);
+    await saveHistory(f);
+    if (!isNotes(f)) sendTo(f, wire(m));
+  }
+
+  function sendText() {
+    const text = $('text').value.trim();
+    if (!text) return;
+    $('text').value = '';
+    sendChat({ text: text.slice(0, 4000) });
+  }
+
+  function sendImage() {
+    const file = $('file').files[0];
+    $('file').value = '';
+    if (!file) return;
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, 1000 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(img.src);
+      sendChat({ image: c.toDataURL('image/jpeg', 0.7) });
+    };
+    img.onerror = () => toast('That image could not be read');
+    img.src = URL.createObjectURL(file);
+  }
+
+  function onAck(f, id) {
+    const s = sessions[f];
+    if (!s) return;
+    const m = s.history.find((x) => x.id === id && x.mine);
+    if (!m || m.status !== 'sending') return;
+    m.status = 'delivered';
+    saveHistory(f);
+    if (current === f) refreshTicks();
+  }
+
+  function onRead(f, ids) {
+    const s = sessions[f];
+    if (!s || !Array.isArray(ids)) return;
+    const want = new Set(ids.filter((x) => typeof x === 'string'));
+    let changed = false;
+    for (const m of s.history) {
+      if (m.mine && want.has(m.id) && m.status !== 'read') { m.status = 'read'; changed = true; }
+    }
+    if (!changed) return;
+    saveHistory(f);
+    if (current === f) refreshTicks();
+  }
+
+  // Tell your friend you've seen their messages (only while the chat is open on screen)
+  async function markRead(f) {
+    const s = sessions[f];
+    if (!s || current !== f || document.hidden || !$('screen-chat').classList.contains('active') || !isOnline(f)) return;
+    const unseen = s.history.filter((m) => !m.mine && !m.readSent);
+    if (!unseen.length) return;
+    if (await sendTo(f, { type: 'read', ids: unseen.map((m) => m.id) })) {
+      unseen.forEach((m) => { m.readSent = true; });
+      saveHistory(f);
+    }
+  }
+  document.addEventListener('visibilitychange', () => { if (current) markRead(current); });
+
+  async function receiveChat(f, m) {
+    if (typeof m.id !== 'string' || !ID_RE.test(m.id)) return;
+    if (typeof m.fp === 'string' && m.fp.length < 100) {
+      const existing = load(K.fp(f), null);
+      if (!existing) store(K.fp(f), m.fp); // first message sets the expected shared-code fingerprint
+    }
+    const sentAt = Number.isFinite(m.at) && m.at > 0 && m.at < Date.now() + 864e5 ? m.at : Date.now();
+    const entry = {
+      id: m.id, mine: false,
+      text: typeof m.text === 'string' ? m.text.slice(0, 4000) : '',
+      image: validImage(m.image) ? m.image : null,
+      voice: validVoice(m.voice) ? m.voice : null,
+      at: sentAt,
+    };
+    if (!entry.text && !entry.image && !entry.voice) return;
+
+    const seen = load(K.seen(f), []);
+    if (seen.includes(m.id)) { sendTo(f, { type: 'ack', id: m.id }); return; }
+    addContact(f, strangerKeys[f] || (conns[f] && conns[f]._key));
+    touch(f);
+
+    const chatOpen = current === f && $('screen-chat').classList.contains('active');
+    let stored = false;
+
+    if (sessions[f]) {
+      sessions[f].history.push(entry);
+      await saveHistory(f);
+      stored = true;
+      if (chatOpen) { addBubble(entry); scrollDown(); } else bumpUnread(f);
+    } else {
+      const v = load(K.vault(f), null);
+      if (v) {
+        const box = await sealForInbox(v.pub, entry);
+        const inbox = load(K.inbox(f), []);
+        inbox.push(box);
+        stored = store(K.inbox(f), inbox);
+        if (stored) bumpUnread(f);
+      } else {
+        // A chat request: held until you make a code. It isn't confirmed yet,
+        // so your friend's app keeps it and resends if this tab closes.
+        pendingNew[f] = pendingNew[f] || [];
+        if (pendingNew[f].some((x) => x.id === m.id)) return;
+        pendingNew[f].push(entry);
+        bumpUnread(f, pendingNew[f].length);
+        if (pendingNew[f].length === 1) toast(`💌 New chat request from ${f}`);
+      }
+    }
+
+    if (stored) {
+      seen.push(m.id);
+      store(K.seen(f), seen.slice(-500));
+      await sendTo(f, { type: 'ack', id: m.id });
+      if (chatOpen) markRead(f);
+    }
+    blip();
+  }
+
+  // ================= message actions =================
+  const REACTS = ['❤️','😂','👍','😮','😢','🔥'];
+  function closeSheet(){ const s=$('sheet'); if(s) s.remove(); }
+  function openMsgMenu(m) {
+    if (m.gone) return;
+    const bg=el('div','','sheet-bg'); bg.id='sheet'; bg.onclick=(e)=>{if(e.target===bg)closeSheet();};
+    const sheet=el('div','','sheet');
+    const rr=el('div','','react-row');
+    for(const emo of REACTS){ const b=el('button',emo); b.onclick=()=>{react(m,emo);closeSheet();}; rr.append(b);} sheet.append(rr);
+    const fwd=el('button','↪️ Forward','act'); fwd.onclick=()=>{closeSheet();openForward(m);}; sheet.append(fwd);
+    if(m.text && !m.image){ const cp=el('button','📋 Copy text','act'); cp.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(m.text);toast('Copied');closeSheet();}; sheet.append(cp); }
+    if(m.mine){ const un=el('button','🗑 Unsend','act del'); un.onclick=()=>{closeSheet();unsend(m);}; sheet.append(un); }
+    const c=el('button','Cancel','act'); c.onclick=closeSheet; sheet.append(c);
+    bg.append(sheet); document.body.append(bg);
+  }
+  async function react(m,emo){ m.reacts=m.reacts||{}; m.reacts['_me']=m.reacts['_me']===emo?'':emo; redrawMsg(m); await saveHistory(current); sendTo(current,{type:'react',id:m.id,emo:m.reacts['_me']}); }
+  function onReact(f,id,emo){ const s=sessions[f]; if(!s)return; const m=s.history.find(x=>x.id===id); if(!m)return; m.reacts=m.reacts||{}; if(emo)m.reacts[f]=emo; else delete m.reacts[f]; saveHistory(f); if(current===f)redrawMsg(m); }
+  async function unsend(m){ if(!confirm('Unsend this message? They will see "message unsent".'))return; m.gone=true;m.text='';m.image=null;m.reacts={}; redrawMsg(m); await saveHistory(current); sendTo(current,{type:'unsend',id:m.id}); }
+  function onUnsend(f,id){ const s=sessions[f]; if(!s)return; const m=s.history.find(x=>x.id===id); if(!m||m.gone)return; m.gone=true;m.text='';m.image=null;m.reacts={}; saveHistory(f); if(current===f)redrawMsg(m); }
+  function openForward(m){
+    const targets=contacts().filter(f=>f!==current && !isRequest(f) && sessions[f]);
+    if(!targets.length)return toast('Open another chat first to forward into it');
+    const bg=el('div','','sheet-bg'); bg.id='sheet'; bg.onclick=(e)=>{if(e.target===bg)closeSheet();};
+    const sheet=el('div','','sheet'); sheet.append(el('p','Forward to...','section'));
+    for(const f of targets){ const b=el('button',f,'act'); b.onclick=()=>{closeSheet();forwardTo(f,m);}; sheet.append(b); }
+    const c=el('button','Cancel','act'); c.onclick=closeSheet; sheet.append(c);
+    bg.append(sheet); document.body.append(bg);
+  }
+  async function forwardTo(f,m){
+    const fwd={id:rid(),mine:true,text:m.text||'',image:m.image||null,at:Date.now(),status:'sending',reacts:{}};
+    sessions[f].history.push(fwd); touch(f); await saveHistory(f); sendTo(f,wire(fwd));
+    toast('Forwarded to '+f+' ↪️');
+  }
+
+  // ================= fun effects =================
+  let audio;
+  function blip(freq = 660) {
+    try {
+      audio = audio || new AudioContext();
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0.12, audio.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.2);
+      o.connect(g).connect(audio.destination);
+      o.start(); o.stop(audio.currentTime + 0.2);
+    } catch {}
+  }
+  function confetti() {
+    if (reduceMotion) return;
+    const bits = ['🎉', '✨', '🎊', '⭐', '💖'];
+    for (let i = 0; i < 30; i++) {
+      const s = el('span', bits[i % bits.length], 'confetti');
+      s.style.left = Math.random() * 100 + 'vw';
+      s.style.fontSize = 16 + Math.random() * 20 + 'px';
+      s.style.animationDelay = Math.random() * 0.6 + 's';
+      document.body.append(s);
+      setTimeout(() => s.remove(), 3000);
+    }
+  }
+  function shake() {
+    document.body.classList.remove('shake');
+    void document.body.offsetWidth;
+    document.body.classList.add('shake');
+    if (navigator.vibrate) navigator.vibrate(300);
+  }
+
+  // ================= nudge =================
+  function canPlay() {
+    if (isOnline(current)) return true;
+    toast(current + ' needs to be online for that');
+    return false;
+  }
+  function nudge() {
+    if (!canPlay()) return;
+    sendTo(current, { type: 'nudge' });
+    note('You nudged ' + current + ' 👋');
+  }
+  function onNudge() {
+    shake();
+    blip(300);
+    note(current + ' nudged you! 👋');
+  }
+
+  // ================= game panel =================
+  function openPanel(...children) {
+    $('game-body').replaceChildren(...children);
+    $('game').style.display = 'block';
+  }
+  function closeGame() { $('game').style.display = 'none'; }
+
+  // ================= tic-tac-toe =================
+  const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  const MARK = { X: '❌', O: '⭕' };
+  let ttt = null;
+
+  function startTTT() {
+    if (!canPlay()) return;
+    newTTT('X');
+    sendTo(current, { type: 'ttt', action: 'start' });
+    note('You started Tic-tac-toe. You go first ❌');
+  }
+  function newTTT(mark) {
+    ttt = { board: Array(9).fill(''), me: mark, turn: 'X', over: false, win: [], result: '' };
+    renderTTT();
+  }
+  function tttClick(i) {
+    if (!ttt || ttt.over || ttt.turn !== ttt.me || ttt.board[i]) return;
+    placeTTT(i, ttt.me);
+    sendTo(current, { type: 'ttt', action: 'move', cell: i });
+  }
+  function placeTTT(i, mark) {
+    ttt.board[i] = mark;
+    const line = LINES.find((l) => l.every((j) => ttt.board[j] === mark));
+    if (line) { ttt.over = true; ttt.win = line; ttt.result = mark === ttt.me ? 'win' : 'lose'; }
+    else if (ttt.board.every(Boolean)) { ttt.over = true; ttt.result = 'draw'; }
+    else ttt.turn = mark === 'X' ? 'O' : 'X';
+    renderTTT();
+    if (ttt.result === 'win') { confetti(); blip(880); }
+  }
+  function onTTT(m) {
+    if (m.action === 'start') {
+      newTTT('O');
+      blip();
+      note(current + ' challenged you to Tic-tac-toe! You are ⭕');
+    } else if (m.action === 'move' && ttt && !ttt.over && ttt.turn !== ttt.me) {
+      const i = m.cell;
+      if (Number.isInteger(i) && i >= 0 && i < 9 && !ttt.board[i]) placeTTT(i, ttt.me === 'X' ? 'O' : 'X');
+    }
+  }
+  function renderTTT() {
+    let status;
+    if (ttt.result === 'win') status = 'You win! 🎉';
+    else if (ttt.result === 'lose') status = current + ' wins 😭';
+    else if (ttt.result === 'draw') status = "It's a draw 🤝";
+    else status = ttt.turn === ttt.me ? 'Your turn ' + MARK[ttt.me] : current + ' is thinking... 🤔';
+
+    const grid = el('div', '', 'grid');
+    ttt.board.forEach((v, i) => {
+      const b = el('button', v ? MARK[v] : '', 'cell' + (ttt.win.includes(i) ? ' win' : ''));
+      b.setAttribute('aria-label', 'Square ' + (i + 1));
+      b.onclick = () => tttClick(i);
+      grid.append(b);
+    });
+    const parts = [el('h3', 'Tic-tac-toe'), el('p', status, 'status'), grid];
+    if (ttt.over) {
+      const again = el('button', 'Play again');
+      again.onclick = startTTT;
+      parts.push(el('div'), again);
+    }
+    openPanel(...parts);
+  }
+
+  // ================= rock paper scissors =================
+  const RPS = { rock: '🪨', paper: '📄', scissors: '✂️' };
+  const BEATS = { rock: 'scissors', paper: 'rock', scissors: 'paper' };
+  let rps = { mine: null, theirs: null, result: '' };
+  const score = { me: 0, them: 0 };
+
+  function startRPS() {
+    if (!canPlay()) return;
+    rps = { mine: null, theirs: null, result: '' };
+    sendTo(current, { type: 'rps', action: 'start' });
+    note('You started Rock Paper Scissors ✂️');
+    renderRPS();
+  }
+  function pickRPS(choice) {
+    if (!canPlay()) return;
+    if (rps.result) rps = { mine: null, theirs: null, result: '' };
+    if (rps.mine) return;
+    rps.mine = choice;
+    sendTo(current, { type: 'rps', action: 'pick', choice });
+    checkRPS();
+  }
+  function onRPS(m) {
+    if (m.action === 'start') {
+      rps = { mine: null, theirs: null, result: '' };
+      blip();
+      note(current + ' wants to play Rock Paper Scissors! ✂️');
+      renderRPS();
+    } else if (m.action === 'pick' && RPS[m.choice]) {
+      if (rps.result) rps = { mine: null, theirs: null, result: '' };
+      rps.theirs = m.choice;
+      checkRPS();
+    }
+  }
+  function checkRPS() {
+    if (rps.mine && rps.theirs) {
+      if (rps.mine === rps.theirs) rps.result = 'draw';
+      else if (BEATS[rps.mine] === rps.theirs) { rps.result = 'win'; score.me++; confetti(); blip(880); }
+      else { rps.result = 'lose'; score.them++; }
+    }
+    renderRPS();
+  }
+  function renderRPS() {
+    let status;
+    if (rps.result) {
+      const outcome = rps.result === 'win' ? 'You win! 🎉' : rps.result === 'lose' ? current + ' wins 😭' : 'Draw 🤝';
+      status = RPS[rps.mine] + ' vs ' + RPS[rps.theirs] + '  ' + outcome + '  Pick again to replay';
+    } else if (rps.mine) status = 'You picked ' + RPS[rps.mine] + '. Waiting for ' + current + '...';
+    else if (rps.theirs) status = current + ' picked! Your turn 👀';
+    else status = 'Pick one!';
+
+    const row = el('div', '', 'rps');
+    for (const [key, icon] of Object.entries(RPS)) {
+      const b = el('button', icon, rps.mine === key ? 'picked' : '');
+      b.setAttribute('aria-label', key);
+      b.disabled = !!rps.mine && !rps.result;
+      b.onclick = () => pickRPS(key);
+      row.append(b);
+    }
+    openPanel(el('h3', 'Rock Paper Scissors'), el('p', status, 'status'), row,
+      el('p', 'You ' + score.me + ' : ' + score.them + ' ' + current, 'score'));
+  }
+
+  // ================= connect 4 =================
+  let c4 = null;
+  function startC4(){ if(!canPlay())return; newC4('r'); sendTo(current,{type:'c4',action:'start'}); note('You started Connect 4. You are 🔴 and go first'); }
+  function newC4(color){ c4={grid:Array(42).fill(''),me:color,turn:'r',over:false,win:[],result:''}; renderC4(); }
+  function c4Drop(col){ if(!c4||c4.over||c4.turn!==c4.me)return; const r=c4Land(col); if(r<0)return; c4Place(r*7+col,c4.me); sendTo(current,{type:'c4',action:'drop',col}); }
+  function c4Land(col){ for(let r=5;r>=0;r--) if(!c4.grid[r*7+col])return r; return -1; }
+  function c4Place(i,color){ c4.grid[i]=color; const line=c4Win(i,color); if(line){c4.over=true;c4.win=line;c4.result=color===c4.me?'win':'lose';} else if(c4.grid.every(Boolean)){c4.over=true;c4.result='draw';} else c4.turn=color==='r'?'y':'r'; renderC4(); if(c4.result==='win'){confetti();blip(880);} }
+  function c4Win(i,color){ const r=Math.floor(i/7),c=i%7; for(const [dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){ const line=[i]; for(const sgn of [1,-1]){ let rr=r+dr*sgn,cc=c+dc*sgn; while(rr>=0&&rr<6&&cc>=0&&cc<7&&c4.grid[rr*7+cc]===color){line.push(rr*7+cc);rr+=dr*sgn;cc+=dc*sgn;} } if(line.length>=4)return line; } return null; }
+  function onC4(m){ if(m.action==='start'){ newC4('y'); blip(); note(current+' challenged you to Connect 4! You are 🟡'); } else if(m.action==='drop'&&c4&&!c4.over&&c4.turn!==c4.me){ const col=m.col; if(Number.isInteger(col)&&col>=0&&col<7){ const r=c4Land(col); if(r>=0)c4Place(r*7+col,c4.me==='r'?'y':'r'); } } }
+  function renderC4(){
+    let status;
+    if(c4.result==='win')status='You win! 🎉'; else if(c4.result==='lose')status=current+' wins 😭'; else if(c4.result==='draw')status="It's a draw 🤝"; else status=c4.turn===c4.me?'Your turn '+(c4.me==='r'?'🔴':'🟡'):current+' is thinking... 🤔';
+    const grid=el('div','','c4');
+    c4.grid.forEach((v,i)=>{ const col=i%7; const b=el('button','','slot'+(v?' '+v:'')+(c4.win.includes(i)?' win':'')); b.setAttribute('aria-label','Column '+(col+1)); b.onclick=()=>c4Drop(col); grid.append(b); });
+    const parts=[el('h3','Connect 4'),el('p',status,'status'),grid];
+    if(c4.over){ const a=el('button','Play again'); a.onclick=startC4; parts.push(a); }
+    openPanel(...parts);
+  }
+
+  // ================= nicknames =================
+  function openNicks() {
+    const mine = load(K.mynick(), { nick: '', locked: false });
+    $('mynick-box').value = mine.nick || '';
+    $('mynick-lock').checked = !!mine.locked;
+    const ul = $('nick-list'); ul.replaceChildren();
+    const list = contacts().filter((f) => !isNotes(f));
+    if (!list.length) ul.append(el('p', 'No friends yet.', 'hint'));
+    for (const f of list) {
+      const li = el('li', '', 'contact');
+      const row = el('div', '', 'who'); row.style.padding = '10px';
+      const self = load(K.theirself(f), null);
+      row.append(el('b', disp(f)));
+      row.append(el('span', '@' + f + (self && self.locked ? ' · 🔒 locked their name' : '')));
+      const inp = document.createElement('input');
+      inp.placeholder = 'Nickname for ' + f; inp.maxLength = 24; inp.style.marginTop = '6px';
+      inp.value = cleanNick(load(K.theirnick(f), ''));
+      if (self && self.locked) { inp.disabled = true; inp.placeholder = f + ' locked their name'; }
+      const save = el('button', 'Save', 'ghost small'); save.style.marginTop = '6px';
+      save.onclick = () => setTheirNick(f, inp.value);
+      const box = el('div', ''); box.style.cssText = 'display:flex;gap:8px;align-items:center;';
+      box.append(inp, save);
+      row.append(box);
+      li.append(row); ul.append(li);
+    }
+    show('nicks');
+  }
+  function saveMyNick() {
+    const nick = cleanNick($('mynick-box').value);
+    const locked = $('mynick-lock').checked;
+    store(K.mynick(), { nick, locked });
+    toast('Your name saved');
+    // tell all friends
+    for (const f of contacts()) if (!isNotes(f) && isOnline(f)) sendTo(f, { type: 'myname', nick, locked });
+  }
+  function setTheirNick(f, val) {
+    const self = load(K.theirself(f), null);
+    if (self && self.locked) { toast(f + ' locked their name'); return; }
+    const nick = cleanNick(val);
+    if (nick) store(K.theirnick(f), nick); else localStorage.removeItem(K.theirnick(f));
+    refresh();
+    toast(nick ? ('Saved: ' + f + ' → ' + nick) : 'Nickname cleared');
+    // notify them that you renamed them
+    if (isOnline(f)) sendTo(f, { type: 'renamed', nick });
+  }
+  // a friend told us their own display name + lock
+  function onMyName(f, nick, locked) {
+    store(K.theirself(f), { nick: cleanNick(nick), locked: !!locked });
+    refresh();
+    if (current === f) $('peer-name').textContent = disp(f);
+  }
+  // a friend renamed US (their label for us) - just a heads up
+  function onRenamed(f, nick) {
+    if (cleanNick(nick)) toast('🏷️ ' + f + ' now calls you "' + cleanNick(nick) + '"');
+  }
+
+  // ================= profile picture =================
+  function onPfpPick() {
+    const file = $('pfp-file').files[0];
+    $('pfp-file').value = '';
+    if (!file) return;
+    const img = new Image();
+    img.onload = () => {
+      // square crop, small (256px) so it stays tiny in storage and quick to send
+      const size = 256;
+      const c = document.createElement('canvas'); c.width = size; c.height = size;
+      const ctx = c.getContext('2d');
+      const s = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+      URL.revokeObjectURL(img.src);
+      const data = c.toDataURL('image/jpeg', 0.8);
+      store(K.mypfp(), data);
+      renderProfile();
+      toast('Picture updated 📷');
+      sharePfp(); // tell online friends
+    };
+    img.onerror = () => toast('That image could not be read');
+    img.src = URL.createObjectURL(file);
+  }
+  function removePfp() {
+    if (!confirm('Remove your profile picture?')) return;
+    localStorage.removeItem(K.mypfp());
+    renderProfile();
+    for (const f of contacts()) if (!isNotes(f)) sendTo(f, { type: 'pfp', data: null });
+    toast('Picture removed');
+  }
+  function sharePfp() {
+    const data = load(K.mypfp(), null);
+    for (const f of contacts()) if (!isNotes(f) && isOnline(f)) sendTo(f, { type: 'pfp', data });
+  }
+  function onPfp(f, data) {
+    if (data === null) { localStorage.removeItem(K.pfp(f)); }
+    else if (validImage(data) && data.length < 5e5) { store(K.pfp(f), data); }
+    else return;
+    refresh();
+    if (current === f) { const a = avatar(f, isOnline(f)); /* header uses text name only */ }
+  }
+
+  // ================= in-chat search =================
+  function toggleSearch() {
+    const box = $('chatsearch');
+    box.hidden = !box.hidden;
+    if (box.hidden) { $('searchbox').value = ''; runChatSearch(); }
+    else setTimeout(() => $('searchbox').focus(), 50);
+  }
+  function runChatSearch() {
+    const q = $('searchbox').value.trim().toLowerCase();
+    const rows = $('msgs').querySelectorAll('.row');
+    let hits = 0;
+    rows.forEach((row) => {
+      const msg = row.querySelector('.msg');
+      if (!msg) return;
+      // reset any previous highlight
+      const raw = msg.dataset.raw || msg.textContent;
+      msg.dataset.raw = raw;
+      if (!q) { row.classList.remove('hidden-search'); if (msg.dataset.raw) paintPlain(msg, raw); return; }
+      const idx = raw.toLowerCase().indexOf(q);
+      if (idx >= 0 && !row.querySelector('img') && !row.querySelector('audio')) {
+        row.classList.remove('hidden-search'); hits++;
+        highlight(msg, raw, idx, q.length);
+      } else if (idx >= 0) { row.classList.remove('hidden-search'); hits++; }
+      else row.classList.add('hidden-search');
+    });
+    $('searchcount').textContent = q ? (hits + (hits === 1 ? ' match' : ' matches')) : '';
+  }
+  function paintPlain(msg, raw) { if (!msg.querySelector('img') && !msg.querySelector('audio')) msg.textContent = raw; }
+  function highlight(msg, raw, idx, len) {
+    msg.replaceChildren(
+      document.createTextNode(raw.slice(0, idx)),
+      el('mark', raw.slice(idx, idx + len)),
+      document.createTextNode(raw.slice(idx + len))
+    );
+  }
+
+  // ================= themes =================
+  const THEMES = ['', 'ocean', 'forest', 'rose', 'light'];
+  const THEME_NAMES = { '': 'Purple', ocean: 'Ocean', forest: 'Forest', rose: 'Rose', light: 'Light' };
+  function applyTheme(t) { if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme'); }
+  function cycleTheme() {
+    const cur = localStorage.getItem(NS + 'theme') || '';
+    const next = THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length];
+    localStorage.setItem(NS + 'theme', next);
+    applyTheme(next);
+    toast('Theme: ' + THEME_NAMES[next]);
+  }
+  applyTheme(localStorage.getItem(NS + 'theme') || '');
+
+  // ================= guide =================
+  const GUIDE = [
+    ['Getting in', 'Open the site, tap Calculator, then any access key opens the real app. Enter your codename, tap Next, then your password. New codenames make a password (write it down, it cannot be recovered).'],
+    ['The disguise', 'The site looks like a maths revision hub. Question Booklet is real (questions + a calculator). Calculator is the secret door into chat.'],
+    ['Panic switch (Esc)', 'Anywhere in the app, press Esc to jump instantly to the Question Booklet. Press Esc again to come back. When you do this, your online friends see a banner that you are in EOM (eyes on me).'],
+    ['EOM status', 'When a friend hits the panic switch or opens the booklet, you see an orange bar: "name is in EOM, using Question Booklet". It clears when they return.'],
+    ['Adding people', 'Type a friend\'s codename and tap Add. Tell them your codename in person or on a call, never over a hacked app.'],
+    ['Shared chat codes', 'Each chat has ONE shared code you both agree on in person. You and your friend enter the SAME code to open it. Because you both know it, if one of you forgets, the other can remind you and unlock the history again.'],
+    ['Read receipts', 'On your sent messages: ✕ red = friend offline, not delivered yet. – grey = delivered, not seen. ✓ green = seen. "Seen" only counts when they have the chat open.'],
+    ['Messages', 'Send text, emojis, 📷 photos, and 🎤 voice notes (up to 30s). Tap a message for options.'],
+    ['Reactions', 'Tap any message, then pick an emoji to react. Both of you see it.'],
+    ['Unsend', 'Tap your own message, then Unsend. They will see "message unsent".'],
+    ['Forward', 'Tap a message, then Forward, and pick another open chat to send it to.'],
+    ['Notes to self', 'The "Notes to self" chat saves notes only on your device. Great for reminders while friends are offline.'],
+    ['Offline delivery', 'Messages to an offline friend show ✕ and send automatically once you are both online with the app open. If both of you go offline, they wait.'],
+    ['Notifications', 'A yellow bar and pink badges show unread messages. Tap a name to jump in. The tab title shows your unread count.'],
+    ['Security', 'Everything is end-to-end encrypted between you two. If someone logs in as your friend from a new device, you get a ⚠️ warning. Passwords reset only from inside Profile while logged in; trying from the login screen just alerts the owner.'],
+    ['Games', 'Tic-tac-toe ❌⭕, Rock Paper Scissors ✂️, and Connect 4 🔴🟡. Both players need to be online. Plus 👋 Nudge to shake their screen.'],
+    ['Themes', 'Tap 🎨 to cycle colour themes: Purple, Ocean, Forest, Rose, Light.'],
+  ];
+  function openGuide() {
+    const wrap = $('guide-body');
+    wrap.replaceChildren();
+    for (const [h, body] of GUIDE) {
+      wrap.append(el('h3', h));
+      const pEl = el('p', body); pEl.style.color = 'var(--muted)'; pEl.style.margin = '2px 0 14px';
+      wrap.append(pEl);
+    }
+    show('guide');
+  }
+
+  // ================= Notes to self =================
+  const SELF = '__notes__';
+  const isNotes = (f) => f === SELF;
+  async function autoKey(tag) {
+    const base = await crypto.subtle.importKey('raw', enc.encode(acct.salt + ':' + tag), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: unb64(acct.salt), iterations: 60000, hash: 'SHA-256' },
+      base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  async function openNotes() {
+    current = SELF;
+    if (!sessions[SELF]) {
+      const key = await autoKey(SELF);
+      let history = [];
+      const v = load(K.vault(SELF), null);
+      if (v && v.history) { try { history = await unseal(key, v.history); } catch { history = []; } }
+      sessions[SELF] = { key, history, auto: true };
+      if (!v) store(K.vault(SELF), { created: Date.now(), auto: true, history: await seal(key, history) });
+    }
+    openChat(SELF);
+  }
+
+  // ================= voice notes (30s max) =================
+  let rec = null, recChunks = [], recTimer = null, recStop = null;
+  async function toggleRec() {
+    if (rec) { stopRec(); return; }
+    if (!navigator.mediaDevices || !window.MediaRecorder) { toast('Voice notes are not supported on this browser'); return; }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      rec = new MediaRecorder(stream);
+      recChunks = [];
+      rec.ondataavailable = (e) => { if (e.data.size) recChunks.push(e.data); };
+      rec.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(recChunks, { type: rec.mimeType || 'audio/webm' });
+        rec = null;
+        $('mic').classList.remove('recording');
+        clearTimeout(recTimer);
+        if (recStop) { recStop.remove(); recStop = null; }
+        if (blob.size < 500) return;
+        if (blob.size > 2.6e6) { toast('That note is too long to send'); return; }
+        const reader = new FileReader();
+        reader.onload = () => sendChat({ voice: reader.result });
+        reader.readAsDataURL(blob);
+      };
+      rec.start();
+      $('mic').classList.add('recording');
+      const bar = el('div', '🔴 Recording... tap 🎤 to send (max 30s)', 'rec-bar');
+      bar.id = 'recbar';
+      $('bar').before(bar); recStop = bar;
+      recTimer = setTimeout(() => { if (rec) stopRec(); }, 30000);
+    } catch { toast('Microphone permission denied'); }
+  }
+  function stopRec() { if (rec && rec.state !== 'inactive') rec.stop(); }
+
+  // ================= decoy shell, panic switch, EOM =================
+  const QUESTIONS = [
+    ['Algebra', 'Solve 3x + 7 = 22', 'Subtract 7: 3x = 15. Divide by 3: x = 5.'],
+    ['Algebra', 'Factorise x² + 5x + 6', '(x + 2)(x + 3), since 2×3=6 and 2+3=5.'],
+    ['Geometry', 'Area of a triangle with base 8 cm and height 5 cm', 'A = ½ × base × height = ½ × 8 × 5 = 20 cm².'],
+    ['Geometry', 'Interior angle sum of a hexagon', '(n−2)×180 = (6−2)×180 = 720°.'],
+    ['Physics', 'A car travels 150 m in 10 s. Average speed?', 'speed = distance / time = 150 / 10 = 15 m/s.'],
+    ['Physics', 'Force on a 4 kg mass accelerating at 3 m/s²', 'F = ma = 4 × 3 = 12 N.'],
+    ['Trigonometry', 'sin 30° + cos 60°', '0.5 + 0.5 = 1.'],
+    ['Algebra', 'Make y the subject: 2y − 4 = x', 'Add 4: 2y = x + 4. Divide by 2: y = (x + 4) / 2.'],
+  ];
+
+  function buildBooklet() {
+    const wrap = $('decoy-booklet');
+    wrap.replaceChildren();
+    const back = el('button', '← Back', 'decoy-back'); back.onclick = showDecoyHome; wrap.append(back);
+    wrap.append(el('h3', 'Question Booklet'));
+
+    // mini calculator (safe arithmetic only)
+    const calc = el('div', '', 'mini-calc');
+    calc.append(el('div', 'Quick calculator', 'decoy-lead'));
+    const inp = document.createElement('input'); inp.placeholder = 'e.g. (12 + 5) * 3 / 2';
+    const out = el('div', '', 'out');
+    const compute = () => {
+      const t = inp.value.trim();
+      if (!t) { out.textContent = ''; return; }
+      if (!/^[0-9+\-*/(). %]+$/.test(t)) { out.textContent = 'Only numbers and + - * / ( ) allowed'; return; }
+      try { const v = Function('"use strict";return (' + t + ')')(); out.textContent = Number.isFinite(v) ? '= ' + v : 'Invalid'; }
+      catch { out.textContent = 'Invalid expression'; }
+    };
+    inp.addEventListener('input', compute);
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') compute(); });
+    calc.append(inp, out);
+    wrap.append(calc);
+
+    for (const [topic, q, sol] of QUESTIONS) {
+      const card = el('div', '', 'booklet-q');
+      card.append(el('h4', topic));
+      card.append(el('div', q));
+      const btn = el('button', 'Show solution');
+      const solEl = el('div', 'Solution: ' + sol, 'sol');
+      btn.onclick = () => { card.classList.toggle('open'); btn.textContent = card.classList.contains('open') ? 'Hide solution' : 'Show solution'; };
+      card.append(btn, solEl);
+      wrap.append(card);
+    }
+  }
+
+  function showDecoyHome() { $('decoy-home').hidden = false; $('decoy-booklet').hidden = true; }
+  function showBooklet() { buildBooklet(); $('decoy-home').hidden = true; $('decoy-booklet').hidden = false; }
+
+  // Calculator button = gate into the real app
+  function showCalcGate() {
+    const wrap = $('decoy-booklet');
+    wrap.replaceChildren();
+    const back = el('button', '← Back', 'decoy-back'); back.onclick = showDecoyHome; wrap.append(back);
+    wrap.append(el('h3', 'Calculator'));
+    const gate = el('div', '', 'gate');
+    gate.append(el('div', 'Enter access key to load saved workings.', 'decoy-lead'));
+    const inp = document.createElement('input'); inp.type = 'password'; inp.placeholder = 'Access key';
+    const go = el('button', 'Open');
+    const open = () => { enterApp(); };
+    // Any value opens it (it's just a disguise); Enter or click works
+    go.onclick = open;
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') open(); });
+    gate.append(inp, go);
+    wrap.append(gate);
+    $('decoy-home').hidden = true; $('decoy-booklet').hidden = false;
+    setTimeout(() => inp.focus(), 50);
+  }
+
+  let inApp = false;
+  function enterApp() {
+    inApp = true;
+    $('decoy').hidden = true;
+    $('app-root').hidden = false;
+    setEom(false);
+  }
+  // Panic: jump to the booklet instantly. Esc again returns to the app.
+  function panicToBooklet() {
+    if (!inApp) return;
+    $('decoy').hidden = false;
+    $('app-root').style.visibility = 'hidden';
+    showBooklet();
+    setEom(true);
+  }
+  function returnToApp() {
+    $('decoy').hidden = true;
+    $('app-root').style.visibility = 'visible';
+    setEom(false);
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    // close any open sheet first
+    if ($('sheet')) { closeSheet(); return; }
+    if (!inApp) return;
+    if ($('decoy').hidden) panicToBooklet(); else returnToApp();
+  });
+
+  // EOM: tell friends you're in "eyes on me" (booklet) mode
+  let eomOn = false;
+  function setEom(on) {
+    if (on === eomOn) return;
+    eomOn = on;
+    if (!me) return;
+    for (const f of contacts()) if (!isGroupName(f)) broadcastEom(f, on);
+  }
+  function isGroupName(f){ return false; } // groups not in this build
+  function broadcastEom(f, on) { sendTo(f, { type: 'eom', on }); }
+  function onEom(f, on) {
+    const bar = $('eom');
+    eomPeers[f] = !!on;
+    const active = Object.keys(eomPeers).filter((x) => eomPeers[x]);
+    if (!active.length) { bar.hidden = true; bar.classList.remove('eom'); return; }
+    bar.hidden = false; bar.classList.add('eom');
+    bar.textContent = '👁️ ' + active.join(', ') + (active.length === 1 ? ' is' : ' are') + ' in EOM (eyes on me), using Question Booklet';
+  }
+  const eomPeers = {};
+
+  // ================= emoji bar =================
+  for (const e of '😂 😭 🤣 😎 🥳 😭 😡 🤯 🕵️ 👀 👍 💅 👏 🙏 💪 🔥 ❤️ 💀 ✅ 🤫 🔒 💯 🎉 🍕 🦖 👽'.split(' ')) {
+    const b = el('button', e);
+    b.onclick = () => { $('text').value += e; $('text').focus(); };
+    $('emojis').append(b);
+  }
+</script>
+</body>
+</html>
